@@ -79,8 +79,4 @@ Contributions are welcome! Feel free to:
 - Suggest enhancements
 
 ## License
-
-Managed by ASK sophomores
-
-## License
 This project is licensed under the MIT License.
