@@ -1,171 +1,203 @@
-"use client"
+"use client";
 
-import { Button, Divider } from '@nextui-org/react';
-import { Input } from '@nextui-org/input'
-import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Atom, Flame, Search, SendHorizonal, Sprout, Thermometer, TriangleAlert, Waves } from 'lucide-react';
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import {
+  Button,
+  Card,
+  FieldError,
+  Form,
+  Label,
+  Modal,
+  NumberField,
+  ScrollShadow,
+} from "@heroui/react";
+import {
+  Flame,
+  Cloud,
+  Molecule,
+  Magnifier,
+  Droplet,
+  Sun,
+  Flask,
+  CircleInfo,
+  Bulb,
+} from "@gravity-ui/icons";
+import axios from "axios";
+import { GitHub } from "@/icons/github";
+import Link from "next/link";
 
 export default function Home() {
-  const [formData, setFormData] = useState({
-    pm25: '',
-    temperature: '',
-    humidity: '',
-    tvoc: '',
-    co: '',
-    co2: '',
-  });
-
-  const [formErrors, setFormErrors] = useState({
-    pm25: '',
-    temperature: '',
-    humidity: '',
-    tvoc: '',
-    co: '',
-    co2: '',
-  });
-
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setisLoading] = useState(false);
   const [result, setResult] = useState(null);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-    setFormErrors({
-      ...formErrors,
-      [name]: '',
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const errors = {};
+    setisLoading(true);
 
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value === '') {
-        errors[key] = 'This field is required.';
-      }
+    const formData = new FormData(e.currentTarget);
+    const data = {};
+
+    formData.forEach((value, key) => {
+      data[key] = value.toString();
     });
 
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-
-    setLoading(true);
-
     try {
-      const response = await fetch('/api/prompt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      const data = await response.json()
-
-      setResult(data.message);
-      setLoading(false);
+      const response = await axios.post("/api/prompt", data);
+      setResult(response.data.message);
     } catch (err) {
-      setLoading(false);
-      console.error('Error making API request', err);
+      console.error("Error making API request", err);
+    } finally {
+      setisLoading(false);
     }
   };
 
   const inputFields = [
-    { label: 'PM2.5 (µg/m³)', name: 'pm25', placeholder: 'PM2.5', icon: (<Atom size={20} className='text-lime-100/50' />) },
-    { label: 'Temperature (°C)', name: 'temperature', placeholder: 'Temperature', icon: (<Thermometer size={20} className='text-lime-100/50' />) },
-    { label: 'Humidity (%)', name: 'humidity', placeholder: 'Humidity', icon: (<Waves size={20} className='text-lime-100/50' />) },
-    { label: 'TVOC (µg/m³)', name: 'tvoc', placeholder: 'TVOC', icon: (<TriangleAlert size={20} className='text-lime-100/50' />) },
-    { label: 'CO (ppm)', name: 'co', placeholder: 'CO', icon: (<Flame size={20} className='text-lime-100/50' />) },
-    { label: 'CO2 (ppm)', name: 'co2', placeholder: 'CO2', icon: (<Sprout size={20} className='text-lime-100/50' />) },
+    [
+      {
+        label: "PM2.5 (µg/m³)",
+        name: "pm25",
+        icon: Molecule,
+      },
+      {
+        label: "Temperature (°C)",
+        name: "temperature",
+        icon: Sun,
+      },
+    ],
+    [
+      {
+        label: "Humidity (%)",
+        name: "humidity",
+        icon: Droplet,
+      },
+      {
+        label: "TVOC (µg/m³)",
+        name: "tvoc",
+        icon: Flask,
+      },
+    ],
+    [
+      {
+        label: "CO (ppm)",
+        name: "co",
+        icon: Flame,
+      },
+      {
+        label: "CO2 (ppm)",
+        name: "co2",
+        icon: Cloud,
+      },
+    ],
   ];
 
   return (
-    <main className='container mx-auto flex items-center justify-center min-h-screen'>
-      <div className='flex flex-row items-center min-h-screen w-full justify-center'>
-
-        <div className={`h-full w-full flex justify-center items-center flex-col ${result ? 'py-16' : ''}`}>
-
-          <div>
-            <h1 className='text-4xl font-medium text-lime-800 text-center'>AI Air Quality Evaluator</h1>
-            <h1 className='text-md font-medium text-lime-800/50 mb-8 text-center'>Managed by ASK sophomores</h1>
+    <main className="container mx-auto flex items-center justify-center min-h-screen">
+      <div className="absolute top-4 right-4 space-x-2">
+        <Link href="https://github.com/sshokh/aireval">
+          <Button isIconOnly variant="tertiary">
+            <GitHub />
+          </Button>
+        </Link>
+        <Modal>
+          <Button isIconOnly variant="secondary">
+            <CircleInfo />
+          </Button>
+          <Modal.Backdrop>
+            <Modal.Container>
+              <Modal.Dialog>
+                <Modal.CloseTrigger />
+                <Modal.Header>
+                  <Modal.Icon className="bg-background text-accent">
+                    <Bulb className="size-5" />
+                  </Modal.Icon>
+                  <Modal.Heading>What is AirEval?</Modal.Heading>
+                </Modal.Header>
+                <Modal.Body>
+                  <p>
+                    AirEval (Air Quality Evaluator) is a modern web application
+                    that evaluates air quality parameters and provides detailed
+                    AI-powered recommendations and health impact assessments.
+                    Built with Next.js, it features an intuitive interface for
+                    monitoring air quality metrics including PM2.5, temperature,
+                    humidity, TVOC, CO, and CO2 levels.
+                  </p>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button className="w-full" slot="close">
+                    Got it!
+                  </Button>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
+      </div>
+      <div className="flex flex-row items-center min-h-screen w-full justify-center">
+        <div
+          className={`h-full w-full flex justify-center items-center flex-col ${result ? "py-16" : ""}`}
+        >
+          <div className="text-center mb-6 wrap-break-word">
+            <h1 className="text-4xl text-lime-800">AI Air Quality Evaluator</h1>
+            <h1 className="text-md text-lime-800/50">
+              Managed by ASK sophomores
+            </h1>
           </div>
 
-          <div className='flex gap-8 md:flex-row justify-center items-center flex-col w-full'>
+          <div className="flex gap-8 md:flex-row justify-center items-center flex-col w-full">
+            <Form
+              onSubmit={handleSubmit}
+              className="space-y-2 w-[80%] md:w-[40%] lg:w-[30%]"
+            >
+              {inputFields.map((fieldsRow, i) => (
+                <div key={i} className="grid grid-cols-2 gap-4">
+                  {fieldsRow.map((field) => (
+                    <NumberField
+                      isRequired
+                      onChange={(number) =>
+                        handleParamChange(field.name, number)
+                      }
+                      key={field.name}
+                      name={field.name}
+                    >
+                      <Label className="inline-flex items-center text-lime-800">
+                        <field.icon className="mr-1.5" />
+                        {field.label}
+                      </Label>
 
-            <form onSubmit={handleSubmit} className='space-y-2 w-[80%] md:w-[40%] lg:w-[30%]'>
+                      <NumberField.Group>
+                        <NumberField.DecrementButton />
+                        <NumberField.Input />
+                        <NumberField.IncrementButton />
+                      </NumberField.Group>
+                      <FieldError />
+                    </NumberField>
+                  ))}
+                </div>
+              ))}
 
-              {inputFields.map((field) => (
-                <Input
-                  isRequired
-                  key={field.name}
-                  type="text"
-                  label={field.label}
-                  name={field.name}
-                  isInvalid={!!formErrors[field.name]}
-                  value={formData[field.name]}
-                  errorMessage={formErrors[field.name]}
-                  startContent={field.icon}
-                  placeholder={`Enter ${field.placeholder} value...`}
-                  classNames={{
-                    label: "dark:text-white",
-                    input: [
-                      "dark:text-white",
-                      "dark:placeholder-lime-100/50",
-                    ],
-                    inputWrapper: [
-                      "shadow-xl",
-                      "dark:text-white/90",
-                      "bg-lime-800/70",
-                      "backdrop-blur-lg",
-                      "dark:placeholder-lime-500",
-                      "dark:hover:bg-lime-800/60",
-                      "group-data-[focus=true]:bg-lime-800/60",
-                      "!cursor-text",
-                    ],
-                  }}
-                  onChange={handleChange}
-                  onPaste={(event) => {
-                    event.preventDefault();
-                  }}
-                  onKeyPress={(event) => {
-                    if (!/[0-9]/.test(event.key)) {
-                      event.preventDefault();
-                    }
-                  }}
-                />
-              ))
-              }
-
-              <Button type="submit" className='bg-lime-800 w-full' disabled={loading}>
-                {loading ? 'Checking...' : 'Check'}
-                <Search size={16} />
+              <Button
+                type="submit"
+                fullWidth
+                className="mt-4"
+                disabled={isLoading}
+              >
+                <Magnifier />
+                {isLoading ? "Checking..." : "Check"}
               </Button>
-            </form>
+            </Form>
 
             {result && (
-              <div className='bg-lime-800 border border-lime-500 rounded-2xl overflow-y-auto h-[424px] w-[80%] md:w-[40%] lg:w-[30%] px-4 py-2'>
-                <div className='flex flex-row gap-2 items-center pt-2'>
-                  <div className='rounded-full bg-lime-500 size-2'></div>
-                  <div className='rounded-full bg-lime-500 size-2'></div>
-                  <div className='rounded-full bg-lime-500 size-2'></div>
-                </div>
-                <Divider className='my-2 bg-lime-500 h-[1px]' />
-                <div className='text-lime-100'>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
-                </div>
-              </div>
+              <Card className="max-w-lg space-y-4 h-80">
+                <Card.Content className="overflow-auto">
+                  <ReactMarkdown>{result}</ReactMarkdown>
+                </Card.Content>
+              </Card>
             )}
           </div>
         </div>
       </div>
-    </main >
+    </main>
   );
 }

@@ -1,26 +1,22 @@
-import { Poppins } from "next/font/google";
 import "./globals.css";
-import Provider from "./provider";
+import { Inter } from "next/font/google";
 
-const poppins = Poppins({
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  style: ["normal", "italic"],
+const inter = Inter({
   subsets: ["latin"],
-  display: "swap",
+  variable: "--font-inter",
 });
 
 export const metadata = {
   title: "AirEval",
-  description: "AirEval is a simple Next.js-based web application that evaluates air quality parameters (PM2.5, temperature, humidity, TVOC, CO, CO2) and provides detailed AI-based recommendations and health impact assessments in markdown format. The application fetches air quality data and generates an AI response, then renders it beautifully.",
+  description:
+    "AirEval (Air Quality Evaluator) is a modern web application that evaluates air quality parameters and provides detailed AI-powered recommendations and health impact assessments. Built with Next.js, it features an intuitive interface for monitoring air quality metrics including PM2.5, temperature, humidity, TVOC, CO, and CO2 levels.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${poppins.className} bg-lime-200 font-medium text-black antialiased md:pb-0 md:pt-0 overflow-x-hidden`}
-      >
-        <Provider>{children}</Provider>
+    <html data-theme="light" className={`${inter.variable} light`}>
+      <body className="bg-background text-foreground font-sans">
+        {children}
       </body>
     </html>
   );
