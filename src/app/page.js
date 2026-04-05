@@ -155,11 +155,9 @@ export default function Home() {
                   {fieldsRow.map((field) => (
                     <NumberField
                       isRequired
-                      onChange={(number) =>
-                        handleParamChange(field.name, number)
-                      }
                       key={field.name}
                       name={field.name}
+                      defaultValue={0}
                     >
                       <Label className="inline-flex items-center text-lime-800">
                         <field.icon className="mr-1.5" />
@@ -181,6 +179,7 @@ export default function Home() {
                 type="submit"
                 fullWidth
                 className="mt-4"
+                isPending={isLoading}
                 disabled={isLoading}
               >
                 <Magnifier />
